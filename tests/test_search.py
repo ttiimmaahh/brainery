@@ -2,6 +2,7 @@
 
 import textwrap
 from pathlib import Path
+from types import SimpleNamespace
 from unittest import mock
 
 
@@ -36,7 +37,7 @@ def test_search_finds_matching_files(tmp_path, capsys):
     wiki = _make_wiki(tmp_path)
     kb_path = tmp_path
     cfg = {"personal_kb_path": str(kb_path), "_kb_override": None}
-    args = mock.SimpleNamespace(term="attention", kb=None, domain=None)
+    args = SimpleNamespace(term="attention", kb=None, domain=None)
 
     with mock.patch("brainery.config.get_kb_path", return_value=kb_path):
         from brainery.search import run
@@ -50,7 +51,7 @@ def test_search_no_results(tmp_path, capsys):
     """search prints no-results message when term not found."""
     wiki = _make_wiki(tmp_path)
     kb_path = tmp_path
-    args = mock.SimpleNamespace(term="zzznomatch", kb=None, domain=None)
+    args = SimpleNamespace(term="zzznomatch", kb=None, domain=None)
 
     with mock.patch("brainery.config.get_kb_path", return_value=kb_path):
         from brainery.search import run
