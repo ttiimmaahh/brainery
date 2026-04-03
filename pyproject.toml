@@ -64,10 +64,10 @@ kb       = "brainery.cli:main"
 brainery = "brainery.cli:main"
 
 [project.urls]
-Homepage    = "https://github.com/timpearsoncx/brainery"
-Repository  = "https://github.com/timpearsoncx/brainery"
-Issues      = "https://github.com/timpearsoncx/brainery/issues"
-Changelog   = "https://github.com/timpearsoncx/brainery/blob/main/CHANGELOG.md"
+Homepage    = "https://github.com/ttiimmaahh/brainery"
+Repository  = "https://github.com/ttiimmaahh/brainery"
+Issues      = "https://github.com/ttiimmaahh/brainery/issues"
+Changelog   = "https://github.com/ttiimmaahh/brainery/blob/main/CHANGELOG.md"
 
 # ── Hatch build config ────────────────────────────────────────────────────────
 

@@ -4,6 +4,9 @@ from pathlib import Path
 
 from brainery.config import save_config
 
+_DEFAULT_PERSONAL = str(Path.home() / ".brainery" / "personal")
+_DEFAULT_WORK = str(Path.home() / ".brainery" / "work")
+
 
 def run(args, cfg):
     """Run interactive setup wizard."""
@@ -13,17 +16,16 @@ def run(args, cfg):
     # KB Paths
     print("=== KB Paths ===")
     personal_kb_path = _prompt(
-        "Personal KB path (default ~/.brainery/personal)",
-        cfg.get("personal_kb_path", str(Path.home() / ".brainery" / "personal")),
+        "Personal KB path",
+        cfg.get("personal_kb_path", _DEFAULT_PERSONAL),
     )
     cfg["personal_kb_path"] = personal_kb_path
 
     work_kb_path = _prompt(
-        "Work KB path (optional, leave blank to skip)",
-        cfg.get("work_kb_path", ""),
+        "Work KB path (press Enter to skip)",
+        cfg.get("work_kb_path", _DEFAULT_WORK),
     )
-    if work_kb_path:
-        cfg["work_kb_path"] = work_kb_path
+    cfg["work_kb_path"] = work_kb_path
 
     default_kb = _prompt(
         "Default KB ('personal' or 'work')",
@@ -74,10 +76,36 @@ def run(args, cfg):
 
 def _setup_local_llm(cfg: dict) -> None:
     """Configure local LLM backend."""
-    model_path = _prompt(
-        "Path to local model (GGUF or similar)",
-        cfg.get("local_model_path", ""),
-    )
+    # Scan for GGUF models in common locations
+    detected = _find_local_models()
+
+    if detected:
+        print("  Found local models:")
+        for i, path in enumerate(detected, 1):
+            name = Path(path).name
+            print(f"    {i}) {name}")
+            print(f"       {path}")
+        print()
+        choice = _prompt(
+            "Enter a number to select, or paste a full path",
+            cfg.get("local_model_path", "1"),
+        )
+        if choice.isdigit() and 1 <= int(choice) <= len(detected):
+            model_path = detected[int(choice) - 1]
+        else:
+            model_path = choice
+    else:
+        print("  No .gguf models detected automatically.")
+        print("  Common sources:")
+        print("    • LM Studio  → File → Show Models in Finder")
+        print("    • Jan.ai     → ~/jan/models/")
+        print("    • llama.cpp  → wherever you downloaded the .gguf file")
+        print()
+        model_path = _prompt(
+            "Path to .gguf model file",
+            cfg.get("local_model_path", ""),
+        )
+
     cfg["local_model_path"] = model_path
 
     context = _prompt(
@@ -90,7 +118,7 @@ def _setup_local_llm(cfg: dict) -> None:
         cfg["local_model_context"] = 4096
 
     threads = _prompt(
-        "Threads (0 for auto-detect)",
+        "Threads (0 = auto-detect)",
         str(cfg.get("local_model_threads", 0)),
     )
     try:
@@ -99,7 +127,7 @@ def _setup_local_llm(cfg: dict) -> None:
         cfg["local_model_threads"] = 0
 
     gpu_layers = _prompt(
-        "GPU layers (0 to disable)",
+        "GPU layers (0 = CPU only, -1 = all layers on GPU)",
         str(cfg.get("local_model_gpu_layers", 0)),
     )
     try:
@@ -108,6 +136,31 @@ def _setup_local_llm(cfg: dict) -> None:
         cfg["local_model_gpu_layers"] = 0
 
     print()
+
+
+def _find_local_models() -> list[str]:
+    """Scan common locations for .gguf model files. Returns up to 10 paths."""
+    search_dirs = [
+        # LM Studio (macOS)
+        Path.home() / ".lmstudio" / "models",
+        Path.home() / "Library" / "Application Support" / "LM Studio" / "Models",
+        # Jan.ai
+        Path.home() / "jan" / "models",
+        # Generic
+        Path.home() / "models",
+        Path.home() / ".local" / "share" / "models",
+        # LM Studio (Linux)
+        Path.home() / ".local" / "share" / "LM Studio" / "Models",
+    ]
+
+    found = []
+    for d in search_dirs:
+        if d.exists():
+            for gguf in sorted(d.rglob("*.gguf")):
+                found.append(str(gguf))
+                if len(found) >= 10:
+                    return found
+    return found
 
 
 def _prompt(question: str, default: str = "") -> str:

@@ -6,7 +6,7 @@ Clip articles, drop in documents, and let Brainery compile them into a structure
 
 ```bash
 # One-line install (macOS / Linux)
-curl -fsSL https://raw.githubusercontent.com/timpearsoncx/brainery/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ttiimmaahh/brainery/main/scripts/install.sh | bash
 ```
 
 ---
@@ -30,22 +30,25 @@ Two silos: **personal** and **work** — same structure, same commands, separate
 
 ```bash
 # 1. Install
-curl -fsSL https://raw.githubusercontent.com/timpearsoncx/brainery/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ttiimmaahh/brainery/main/scripts/install.sh | bash
 
 # 2. Configure paths and LLM backend
-kb setup
+brainery setup
 
 # 3. Ingest something
-kb ingest https://example.com/interesting-article
-kb ingest ~/Downloads/strategy.docx --kb work
+brainery ingest https://example.com/interesting-article
+brainery ingest ~/Downloads/strategy.docx --kb work
 
 # 4. Compile it into your wiki
-kb compile
+brainery compile
 
 # 5. Ask it anything
-kb query "What are the main ideas from my recent AI reading?"
-kb query "Summarize our Q1 strategy" --kb work --format slides
+brainery query "What are the main ideas from my recent AI reading?"
+brainery query "Summarize our Q1 strategy" --kb work --format slides
 ```
+
+> **Tip:** `kb` is a short alias for `brainery` — both commands are installed.
+> Power users can type `kb compile`, `kb query`, etc. for speed.
 
 ---
 
@@ -53,29 +56,29 @@ kb query "Summarize our Q1 strategy" --kb work --format slides
 
 | Command | Description |
 |---|---|
-| `kb setup` | Interactive configuration wizard |
-| `kb status` | KB stats: articles, domains, pending compilation |
-| `kb ingest <file\|url>` | Add raw content (auto-converts .docx, .pptx, .pdf, URLs) |
-| `kb compile` | LLM-compile uncompiled raw files → wiki articles |
-| `kb query "<question>"` | Natural language Q&A against your wiki |
-| `kb search "<term>"` | Instant full-text search (no LLM) |
-| `kb lint` | LLM health check: gaps, broken links, opportunities |
-| `kb watch` | Background daemon: auto-compile new files as they arrive |
-| `kb install-extension <id>` | Register the KB Clipper Chrome extension |
+| `brainery setup` | Interactive configuration wizard |
+| `brainery status` | KB stats: articles, domains, pending compilation |
+| `brainery ingest <file\|url>` | Add raw content (auto-converts .docx, .pptx, .pdf, URLs) |
+| `brainery compile` | LLM-compile uncompiled raw files → wiki articles |
+| `brainery query "<question>"` | Natural language Q&A against your wiki |
+| `brainery search "<term>"` | Instant full-text search (no LLM) |
+| `brainery lint` | LLM health check: gaps, broken links, opportunities |
+| `brainery watch` | Background daemon: auto-compile new files as they arrive |
+| `brainery install-extension <id>` | Register the KB Clipper Chrome extension |
 
 ### Global flags
 
 ```
 --kb personal|work        Which KB to use (default: from config)
 --domain category/sub     Override domain assignment
---format text|md|slides   Output format for kb query
+--format text|md|slides   Output format for brainery query
 ```
 
 ---
 
 ## LLM backends
 
-Brainery supports two backends, switchable via `kb setup` or `~/.kbconfig.json`:
+Brainery supports two backends, switchable via `brainery setup` or `~/.kbconfig.json`:
 
 ### Anthropic (cloud)
 Best quality for `query` and `lint`. Requires an API key from [console.anthropic.com](https://console.anthropic.com).
@@ -85,7 +88,7 @@ Best quality for `query` and `lint`. Requires an API key from [console.anthropic
 ```
 
 ### Local (llama-cpp-python)
-Offline, free, ideal for `kb watch` running continuously in the background.
+Offline, free, ideal for `brainery watch` running continuously in the background.
 Any GGUF model works. Recommended: `mistral-7b-instruct`, `llama-3-8b-instruct`, `phi-3-medium`.
 
 ```json
@@ -99,8 +102,8 @@ Any GGUF model works. Recommended: `mistral-7b-instruct`, `llama-3-8b-instruct`,
 
 ```bash
 pip install "brainery[local]"
-kb setup   # select 'local' backend
-kb watch   # daemon starts, model loads once, compiles forever
+brainery setup   # select 'local' backend — setup will scan for .gguf files automatically
+brainery watch   # daemon starts, model loads once, compiles forever
 ```
 
 ---
@@ -113,7 +116,7 @@ Clip web pages directly into your KB with domain tagging — no copy-paste, no f
 1. Clone this repo or [download the extension](chrome-extension/)
 2. Open `chrome://extensions` → enable Developer mode → Load unpacked → select `chrome-extension/`
 3. Copy the extension ID shown
-4. Run `kb install-extension <id>`
+4. Run `brainery install-extension <id>`
 5. Click the extension icon — the dot turns green ✓
 
 The extension writes clipped pages as markdown directly to your `raw/` directory via a native messaging host. Select personal or work KB, pick a domain, and click **Clip to KB**.
@@ -124,20 +127,30 @@ The extension writes clipped pages as markdown directly to your `raw/` directory
 
 ### One-line (recommended)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/timpearsoncx/brainery/main/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/ttiimmaahh/brainery/main/scripts/install.sh | bash
 ```
 
-### pip
+### Uninstall
+```bash
+curl -fsSL https://raw.githubusercontent.com/ttiimmaahh/brainery/main/scripts/uninstall.sh | bash
+```
+
+Walks you through removing the CLI, config files, and optionally your KB data (kept by default).
+
+### pip / uv
 ```bash
 pip install brainery
 
 # With all optional dependencies
 pip install "brainery[full]"
+
+# Via uv
+uv tool install brainery
 ```
 
 ### From source
 ```bash
-git clone https://github.com/timpearsoncx/brainery
+git clone https://github.com/ttiimmaahh/brainery
 cd brainery
 pip install -e ".[dev]"
 ```
@@ -147,7 +160,7 @@ pip install -e ".[dev]"
 ## Agentic coding integration
 
 Drop `skills/SKILL.md` into your project root (or `~/.brainery/SKILL.md`) and your AI coding
-assistant — Claude Code, Cursor, Copilot Workspace — will automatically know how to use `kb`
+assistant — Claude Code, Cursor, Copilot Workspace — will automatically know how to use `brainery`
 as a tool in its workflows.
 
 ```bash
@@ -162,12 +175,12 @@ The CLI is the interface — no MCP server needed. Any agent that can run shell 
 
 ## Configuration
 
-Config lives at `~/.kbconfig.json`. Edit directly or via `kb setup`.
+Config lives at `~/.kbconfig.json`. Edit directly or via `brainery setup`.
 
 ```json
 {
-  "personal_kb_path": "/path/to/personal",
-  "work_kb_path":     "/path/to/work",
+  "personal_kb_path": "~/.brainery/personal",
+  "work_kb_path":     "~/.brainery/work",
   "default_kb":       "personal",
   "llm_backend":      "anthropic",
   "anthropic_api_key": "sk-ant-...",
@@ -183,11 +196,11 @@ Config lives at `~/.kbconfig.json`. Edit directly or via `kb setup`.
 
 ## Roadmap
 
-- [ ] `kb serve` — local web UI (FastAPI + SPA)
-- [ ] `kb tui` — terminal UI (Textual)
+- [ ] `brainery serve` — local web UI (FastAPI + SPA)
+- [ ] `brainery tui` — terminal UI (Textual)
 - [ ] Firefox extension
 - [ ] Windows PowerShell installer
-- [ ] `kb sync` — git-based KB backup/sync
+- [ ] `brainery sync` — git-based KB backup/sync
 - [ ] Homebrew formula
 
 ---
@@ -197,7 +210,7 @@ Config lives at `~/.kbconfig.json`. Edit directly or via `kb setup`.
 Contributions welcome. Please open an issue before submitting large PRs.
 
 ```bash
-git clone https://github.com/timpearsoncx/brainery
+git clone https://github.com/ttiimmaahh/brainery
 cd brainery
 pip install -e ".[dev]"
 pytest
