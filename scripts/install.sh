@@ -298,17 +298,28 @@ if [[ -z "${BRAINERY_NO_SETUP:-}" ]]; then
   fi
 fi
 
-# ── Start clip server ────────────────────────────────────────────────────────
-header "Clip Server"
-echo -e "  The clip server lets the Chrome extension send clips to Brainery."
-echo -e "  It runs in the background on ${BOLD}http://127.0.0.1:52337${NC}"
+# ── Background services ──────────────────────────────────────────────────────
+header "Background Services"
+
+echo -e "  Brainery can run two background services that auto-start on login:"
+echo -e "    ${BOLD}Clip server${NC}  — lets the Chrome extension send clips (port 52337)"
+echo -e "    ${BOLD}Watch daemon${NC} — auto-compiles new files as they arrive in raw/"
 echo ""
-read -r -p "  Start clip server automatically on login? [Y/n] " START_SERVER </dev/tty
+
+read -r -p "  Start clip server on login? [Y/n] " START_SERVER </dev/tty
 START_SERVER="${START_SERVER:-Y}"
 if [[ "$START_SERVER" =~ ^[Yy]$ ]]; then
   brainery serve --install 2>/dev/null \
-    && success "Clip server is running" \
-    || warn "Could not start clip server. Run manually: brainery serve --install"
+    && success "Clip server installed" \
+    || warn "Could not start clip server. Run: brainery serve --install"
+fi
+
+read -r -p "  Start watch daemon on login? [Y/n] " START_WATCH </dev/tty
+START_WATCH="${START_WATCH:-Y}"
+if [[ "$START_WATCH" =~ ^[Yy]$ ]]; then
+  brainery watch --install 2>/dev/null \
+    && success "Watch daemon installed" \
+    || warn "Could not start watch daemon. Run: brainery watch --install"
 fi
 
 echo ""

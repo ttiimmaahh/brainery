@@ -124,6 +124,16 @@ Docs & source: https://github.com/timpearsoncx/brainery
     p_watch.add_argument("--stop", action="store_true", help="Stop the running watcher")
     p_watch.add_argument("--status", action="store_true", help="Show watcher status and log tail")
     p_watch.add_argument(
+        "--install",
+        action="store_true",
+        help="Install as a background service (auto-starts on login)",
+    )
+    p_watch.add_argument(
+        "--uninstall",
+        action="store_true",
+        help="Remove the background service",
+    )
+    p_watch.add_argument(
         "--foreground", "-f",
         action="store_true",
         help="Run in foreground (don't daemonize — good for debugging)",

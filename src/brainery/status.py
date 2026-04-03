@@ -50,11 +50,16 @@ def run(args, cfg):
     print(f"KB: {kb} ({kb_path})")
     print(f"Backend:    {cfg.get('llm_backend', 'anthropic')}")
 
-    # Clip server status
-    if is_running():
-        print("Clip server: running (http://127.0.0.1:52337)")
+    # Service status
+    if is_running("serve"):
+        print("Clip server:  running (http://127.0.0.1:52337)")
     else:
-        print("Clip server: not running")
+        print("Clip server:  not running")
+
+    if is_running("watch"):
+        print("Watch daemon: running")
+    else:
+        print("Watch daemon: not running")
 
     print()
     print(f"Raw files:  {raw_count}")

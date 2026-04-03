@@ -41,25 +41,32 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
   exit 0
 fi
 
-# ── Stop clip server service ──────────────────────────────────────────────────
-header "Stopping Clip Server"
+# ── Stop background services ─────────────────────────────────────────────────
+header "Stopping Background Services"
 
 # macOS launchd
-PLIST="$HOME/Library/LaunchAgents/com.brainery.serve.plist"
-if [[ -f "$PLIST" ]]; then
-  launchctl unload "$PLIST" 2>/dev/null
-  rm -f "$PLIST"
-  success "Removed launchd service"
-fi
+for SVC_PLIST in "com.brainery.serve" "com.brainery.watch"; do
+  PLIST="$HOME/Library/LaunchAgents/${SVC_PLIST}.plist"
+  if [[ -f "$PLIST" ]]; then
+    launchctl unload "$PLIST" 2>/dev/null
+    rm -f "$PLIST"
+    success "Removed $SVC_PLIST"
+  fi
+done
 
 # Linux systemd
-UNIT="$HOME/.config/systemd/user/brainery-serve.service"
-if [[ -f "$UNIT" ]]; then
-  systemctl --user stop brainery-serve 2>/dev/null
-  systemctl --user disable brainery-serve 2>/dev/null
-  rm -f "$UNIT"
-  systemctl --user daemon-reload 2>/dev/null
-  success "Removed systemd service"
+for SVC_UNIT in "brainery-serve" "brainery-watch"; do
+  UNIT="$HOME/.config/systemd/user/${SVC_UNIT}.service"
+  if [[ -f "$UNIT" ]]; then
+    systemctl --user stop "$SVC_UNIT" 2>/dev/null
+    systemctl --user disable "$SVC_UNIT" 2>/dev/null
+    rm -f "$UNIT"
+    success "Removed $SVC_UNIT"
+  fi
+done
+# Reload systemd if any units were removed
+if [[ -d "$HOME/.config/systemd/user" ]]; then
+  systemctl --user daemon-reload 2>/dev/null || true
 fi
 
 # ── Remove CLI ────────────────────────────────────────────────────────────────

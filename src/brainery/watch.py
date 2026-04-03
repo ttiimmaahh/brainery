@@ -26,6 +26,17 @@ def run(args, cfg):
     # Ensure .brainery directory exists
     WATCH_PID_FILE.parent.mkdir(parents=True, exist_ok=True)
 
+    if getattr(args, "install", False):
+        from brainery.service import install_service
+        if install_service("watch"):
+            print("Watch daemon will auto-start on login.")
+        return
+
+    if getattr(args, "uninstall", False):
+        from brainery.service import uninstall_service
+        uninstall_service("watch")
+        return
+
     if getattr(args, "stop", False):
         _stop_daemon()
     elif getattr(args, "status", False):
