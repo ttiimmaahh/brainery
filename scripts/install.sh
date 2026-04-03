@@ -4,7 +4,7 @@
 #  A brewery for your brain — LLM-powered knowledge base CLI
 #
 #  Usage (recommended):
-#    curl -fsSL https://raw.githubusercontent.com/timpearsoncx/brainery/main/scripts/install.sh | bash
+#    curl -fsSL https://raw.githubusercontent.com/ttiimmaahh/brainery/main/scripts/install.sh | bash
 #
 #  Or clone and run locally:
 #    bash scripts/install.sh
@@ -101,34 +101,73 @@ success "pip $("$PYTHON" -m pip --version | awk '{print $2}')"
 header "Installing Brainery"
 
 VERSION="${BRAINERY_VERSION:-}"
-PACKAGE="brainery"
+BRAINERY_LOCAL="${BRAINERY_LOCAL:-}"   # dev only: set to local repo path
 
-if [[ -n "$VERSION" ]]; then
+# Resolve what to install
+GITHUB_URL="git+https://github.com/ttiimmaahh/brainery.git"
+
+if [[ -n "$BRAINERY_LOCAL" ]]; then
+  PACKAGE="$BRAINERY_LOCAL"
+  info "Local install from: $PACKAGE"
+elif [[ -n "$VERSION" ]]; then
   PACKAGE="brainery==$VERSION"
-  info "Pinned version: $VERSION"
+  info "Installing version: $VERSION"
+else
+  PACKAGE="brainery"
 fi
 
-# Detect if we should use --user (no write access to site-packages)
-PIP_FLAGS=""
-if [[ ! -w "$("$PYTHON" -c "import site; print(site.getsitepackages()[0])" 2>/dev/null || echo '')" ]]; then
-  PIP_FLAGS="--user"
-  warn "No write access to system site-packages — installing with --user"
-fi
+# ── Detect installer ──────────────────────────────────────────────────────────
+# Prefer uv — handles externally-managed Python environments (common on macOS)
+# Fall back to pip with --user or --break-system-packages as needed
+
+_do_install() {
+  local pkg="$1"
+  if command -v uv &>/dev/null; then
+    info "Using uv (detected)"
+    # uv tool install: installs kb as an isolated tool into ~/.local/bin
+    uv tool install "$pkg" 2>/dev/null && return 0
+    # fallback: uv pip into the active env
+    uv pip install "$pkg" 2>/dev/null && return 0
+    return 1
+  else
+    # Try plain pip first
+    "$PYTHON" -m pip install --upgrade "$pkg" -q 2>/dev/null && return 0
+    # Externally-managed env? Try --user
+    "$PYTHON" -m pip install --user --upgrade "$pkg" -q 2>/dev/null && return 0
+    # Last resort for system Pythons that block everything
+    "$PYTHON" -m pip install --break-system-packages --upgrade "$pkg" -q 2>/dev/null && return 0
+    return 1
+  fi
+}
 
 info "Installing $PACKAGE..."
-"$PYTHON" -m pip install $PIP_FLAGS --upgrade "$PACKAGE" -q \
-  || die "pip install failed. Try: $PYTHON -m pip install brainery"
+
+# Try PyPI first; if not found (pre-release), fall back to GitHub
+if ! _do_install "$PACKAGE"; then
+  if [[ "$PACKAGE" == "brainery" ]]; then
+    warn "Not on PyPI yet — installing from GitHub..."
+    _do_install "$GITHUB_URL" \
+      || die "Installation failed. Please open an issue: https://github.com/ttiimmaahh/brainery/issues"
+  else
+    die "Installation failed. Try manually: uv tool install brainery"
+  fi
+fi
+
+# Detect whether uv tool install was used (kb lands in ~/.local/bin)
+INSTALLED_WITH_UV=false
+if command -v uv &>/dev/null; then
+  INSTALLED_WITH_UV=true
+fi
 
 success "Brainery installed"
 
 # ── PATH check ────────────────────────────────────────────────────────────────
 header "PATH configuration"
 
-KB_PATH=$("$PYTHON" -m pip show -f brainery 2>/dev/null \
-  | grep "^Location:" | awk '{print $2}' || true)
-
 SCRIPTS_DIR=""
-if [[ "$PIP_FLAGS" == "--user" ]]; then
+if [[ "$INSTALLED_WITH_UV" == "true" ]]; then
+  SCRIPTS_DIR="$HOME/.local/bin"
+elif [[ "$PIP_FLAGS" == "--user" ]]; then
   SCRIPTS_DIR=$("$PYTHON" -m site --user-base)/bin
 else
   SCRIPTS_DIR=$(dirname "$("$PYTHON" -c "import sys; print(sys.executable)")")
@@ -185,6 +224,6 @@ if [[ -z "${BRAINERY_NO_SETUP:-}" ]]; then
 fi
 
 echo ""
-echo -e "  ${DIM}Docs: https://github.com/timpearsoncx/brainery${NC}"
+echo -e "  ${DIM}Docs: https://github.com/ttiimmaahh/brainery${NC}"
 echo -e "  ${DIM}Give it a star if it helps you! ⭐${NC}"
 echo ""
