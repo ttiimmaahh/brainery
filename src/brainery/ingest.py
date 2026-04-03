@@ -5,6 +5,7 @@ Supports: .md/.txt (copy), .docx (mammoth), .pptx (python-pptx),
 Each ingested file gets a .meta.json sidecar with source info + domain override.
 """
 
+import contextlib
 import json
 import subprocess
 import sys
@@ -150,9 +151,8 @@ def _convert_pptx(source_path: Path) -> str:
         for i, slide in enumerate(prs.slides, 1):
             slide_text = f"## Slide {i}\n"
             for shape in slide.shapes:
-                if hasattr(shape, "text"):
-                    if shape.text.strip():
-                        slide_text += shape.text + "\n"
+                if hasattr(shape, "text") and shape.text.strip():
+                    slide_text += shape.text + "\n"
             slides_text.append(slide_text)
         return "\n".join(slides_text)
     except Exception as e:
@@ -183,10 +183,8 @@ def _ensure_package(package_name: str) -> None:
         __import__(package_name)
     except ImportError:
         # Lazy install
-        try:
+        with contextlib.suppress(subprocess.CalledProcessError):
             subprocess.run(
                 [sys.executable, "-m", "pip", "install", "--break-system-packages", "-q", package_name],
                 check=True,
             )
-        except subprocess.CalledProcessError:
-            pass

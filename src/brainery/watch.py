@@ -1,18 +1,21 @@
 """Background daemon that watches raw/ directories and auto-compiles new files."""
 
+import contextlib
 import json
 import logging
 import os
 import signal
 import sys
 import time
-from datetime import datetime
 from pathlib import Path
 
-from brainery.config import get_kb_path, load_prompt, load_domains
-from brainery.compile import get_compiled_sources, get_existing_articles_summary, save_compiled_article
+from brainery.compile import (
+    get_compiled_sources,
+    get_existing_articles_summary,
+    save_compiled_article,
+)
+from brainery.config import get_kb_path, load_prompt
 from brainery.llm import call_llm
-
 
 WATCH_PID_FILE = Path.home() / ".brainery" / "watch.pid"
 WATCH_LOG_FILE = Path.home() / ".brainery" / "watch.log"
@@ -112,15 +115,13 @@ def _start_daemon(cfg: dict, foreground: bool = False) -> None:
             return
 
         # Child process
-        try:
+        with contextlib.suppress(AttributeError, OSError):
             os.setsid()
-        except (AttributeError, OSError):
-            pass
 
         # Redirect stdout/stderr
-        devnull = open(os.devnull, "w")
-        os.dup2(devnull.fileno(), sys.stdout.fileno())
-        os.dup2(devnull.fileno(), sys.stderr.fileno())
+        with open(os.devnull, "w") as devnull:
+            os.dup2(devnull.fileno(), sys.stdout.fileno())
+            os.dup2(devnull.fileno(), sys.stderr.fileno())
 
         logger.info("Starting watcher (daemon)...")
         _run_watcher(cfg, logger)
@@ -131,8 +132,7 @@ def _run_watcher(cfg: dict, logger: logging.Logger) -> None:
     """Main watcher loop."""
     # Try to use watchdog if available, else fall back to polling
     try:
-        from watchdog.observers import Observer
-        from watchdog.events import FileSystemEventHandler
+        import watchdog  # noqa: F401
 
         has_watchdog = True
     except ImportError:
@@ -147,8 +147,8 @@ def _run_watcher(cfg: dict, logger: logging.Logger) -> None:
 
 def _run_watcher_event_driven(cfg: dict, logger: logging.Logger) -> None:
     """Event-driven watcher using watchdog."""
-    from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
 
     class RawFileHandler(FileSystemEventHandler):
         def __init__(self, cfg_, logger_, debounce_sec=3.0):

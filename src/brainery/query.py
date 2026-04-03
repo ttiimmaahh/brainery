@@ -1,6 +1,5 @@
 """Query the wiki using the LLM with keyword-scored article retrieval."""
 
-import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -100,9 +99,8 @@ def gather_relevant_articles(
                 walk_dir(item, domain_prefix + item.name + "/")
             elif item.is_file() and item.suffix == ".md" and not item.name.startswith("_"):
                 # Check domain filter
-                if domain_scope != "all":
-                    if not domain_prefix.startswith(domain_scope + "/"):
-                        continue
+                if domain_scope != "all" and not domain_prefix.startswith(domain_scope + "/"):
+                    continue
 
                 content = item.read_text(encoding="utf-8")
                 score = sum(content.lower().count(kw) for kw in keywords)

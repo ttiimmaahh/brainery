@@ -1,9 +1,6 @@
 """Tests for brainery.config module."""
 
 import json
-import os
-import tempfile
-from pathlib import Path
 from unittest import mock
 
 import pytest
@@ -14,7 +11,7 @@ def test_load_config_defaults(tmp_path, monkeypatch):
     monkeypatch.setenv("HOME", str(tmp_path))
     # Patch CONFIG_PATH to a non-existent file in tmp_path
     with mock.patch("brainery.config.CONFIG_PATH", tmp_path / ".kbconfig.json"):
-        from brainery.config import load_config, DEFAULT_CONFIG
+        from brainery.config import load_config
         cfg = load_config()
         assert cfg["default_kb"] == "personal"
         assert cfg["llm_backend"] == "anthropic"

@@ -30,10 +30,10 @@ def run(args, cfg):
         sys.exit(1)
 
     print(f"Configured for: {', '.join(installed_browsers)}")
-    print(f"\nNext steps:")
+    print("\nNext steps:")
     print(f"1. Install the KB Clipper Chrome extension (ID: {extension_id})")
-    print(f"2. Grant 'nativeMessaging' permission when prompted")
-    print(f"3. Start using the clipper!")
+    print("2. Grant 'nativeMessaging' permission when prompted")
+    print("3. Start using the clipper!")
 
 
 def _is_valid_extension_id(ext_id: str) -> bool:
@@ -95,7 +95,7 @@ def _install_native_manifest(extension_id: str, host_script: Path) -> list[str]:
         # Windows Registry (not handled here; print instructions)
         print("[warning] Windows registry installation not yet automated.")
         print("Manually add registry entry:")
-        print(f"  HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.brainery.kb_clipper")
+        print("  HKEY_CURRENT_USER\\Software\\Google\\Chrome\\NativeMessagingHosts\\com.brainery.kb_clipper")
         print(f"  Default: {_write_manifest_file(Path.home() / '.brainery' / 'kb_clipper_manifest.json', manifest)}")
         return ["Chrome (manual)"]
     else:
@@ -108,7 +108,7 @@ def _install_native_manifest(extension_id: str, host_script: Path) -> list[str]:
             manifest_path = host_dir / "com.brainery.kb_clipper.json"
             manifest_path.write_text(json.dumps(manifest, indent=2))
             installed.append(browser_name)
-        except (PermissionError, OSError) as e:
+        except (PermissionError, OSError):
             pass
 
     return installed

@@ -1,7 +1,6 @@
 """Config loading, saving, and path resolution for Brainery."""
 
 import json
-import os
 import shutil
 import sys
 from pathlib import Path

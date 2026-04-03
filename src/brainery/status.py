@@ -1,11 +1,9 @@
 """Show KB stats: raw files, wiki articles, domains, pending compilation."""
 
-import sys
 from collections import defaultdict
-from pathlib import Path
 
-from brainery.config import get_kb_path
 from brainery.compile import get_compiled_sources
+from brainery.config import get_kb_path
 
 
 def run(args, cfg):

@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
 
-from brainery.config import get_kb_path, load_prompt, load_domains
+from brainery.config import get_kb_path, load_prompt
 from brainery.llm import call_llm
 
 
@@ -46,7 +46,6 @@ def run(args, cfg):
     print(f"Compiling {len(to_compile)} file(s)...")
 
     compile_prompt_template = load_prompt(cfg, "compile")
-    domains = load_domains(cfg)
 
     for raw_file in to_compile:
         print(f"  {raw_file.name}...", end=" ")

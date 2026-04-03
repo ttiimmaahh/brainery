@@ -1,6 +1,5 @@
 """Interactive setup wizard for Brainery configuration."""
 
-import sys
 from pathlib import Path
 
 from brainery.config import save_config
@@ -113,10 +112,7 @@ def _setup_local_llm(cfg: dict) -> None:
 
 def _prompt(question: str, default: str = "") -> str:
     """Prompt user for input with optional default."""
-    if default:
-        prompt_str = f"{question} [{default}]: "
-    else:
-        prompt_str = f"{question}: "
+    prompt_str = f"{question} [{default}]: " if default else f"{question}: "
 
     response = input(prompt_str).strip()
     return response if response else default
@@ -126,10 +122,7 @@ def _prompt_secret(question: str, default: str = "") -> str:
     """Prompt for sensitive input (masks input)."""
     import getpass
 
-    if default:
-        prompt_str = f"{question} [***]: "
-    else:
-        prompt_str = f"{question}: "
+    prompt_str = f"{question} [***]: " if default else f"{question}: "
 
     response = getpass.getpass(prompt_str).strip()
     return response if response else default

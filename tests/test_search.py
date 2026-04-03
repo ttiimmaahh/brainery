@@ -34,7 +34,7 @@ def _make_wiki(tmp_path: Path) -> Path:
 
 def test_search_finds_matching_files(tmp_path, capsys):
     """search returns files containing the search term."""
-    wiki = _make_wiki(tmp_path)
+    _make_wiki(tmp_path)
     kb_path = tmp_path
     cfg = {"personal_kb_path": str(kb_path), "_kb_override": None}
     args = SimpleNamespace(term="attention", kb=None, domain=None)
@@ -49,7 +49,7 @@ def test_search_finds_matching_files(tmp_path, capsys):
 
 def test_search_no_results(tmp_path, capsys):
     """search prints no-results message when term not found."""
-    wiki = _make_wiki(tmp_path)
+    _make_wiki(tmp_path)
     kb_path = tmp_path
     args = SimpleNamespace(term="zzznomatch", kb=None, domain=None)
 

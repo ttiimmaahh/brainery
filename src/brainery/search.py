@@ -1,6 +1,5 @@
 """Full-text search across the wiki. No LLM needed — instant results."""
 
-import sys
 from pathlib import Path
 
 from brainery.config import get_kb_path
