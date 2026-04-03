@@ -1,0 +1,116 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "brainery"
+version = "0.1.0"
+description = "A brewery for your brain — an LLM-powered personal & work knowledge base"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [{ name = "Brainery Contributors" }]
+keywords = ["knowledge-base", "llm", "wiki", "notes", "ai", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+requires-python = ">=3.10"
+
+# Core has zero hard dependencies — everything is installed lazily on first use.
+# This keeps `pip install brainery` instant and lightweight.
+dependencies = []
+
+[project.optional-dependencies]
+# Install the backend you plan to use
+anthropic = ["anthropic>=0.25"]
+local     = ["llama-cpp-python>=0.2"]
+
+# Feature add-ons
+watch  = ["watchdog>=3.0"]
+web    = ["fastapi>=0.110", "uvicorn>=0.27"]
+tui    = ["textual>=0.50"]
+ingest = ["mammoth>=1.6", "python-pptx>=0.6", "pdfminer.six>=20221105", "html2text>=2020.1"]
+
+# Convenience bundles
+full = [
+    "anthropic>=0.25",
+    "watchdog>=3.0",
+    "mammoth>=1.6",
+    "python-pptx>=0.6",
+    "pdfminer.six>=20221105",
+    "html2text>=2020.1",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "ruff>=0.4",
+    "mypy>=1.10",
+    "hatch>=1.12",
+]
+
+[project.scripts]
+kb       = "brainery.cli:main"
+brainery = "brainery.cli:main"
+
+[project.urls]
+Homepage    = "https://github.com/timpearsoncx/brainery"
+Repository  = "https://github.com/timpearsoncx/brainery"
+Issues      = "https://github.com/timpearsoncx/brainery/issues"
+Changelog   = "https://github.com/timpearsoncx/brainery/blob/main/CHANGELOG.md"
+
+# ── Hatch build config ────────────────────────────────────────────────────────
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/brainery"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/",
+    "scripts/",
+    "skills/",
+    "chrome-extension/",
+    "tests/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+]
+
+# ── Ruff linter ───────────────────────────────────────────────────────────────
+
+[tool.ruff]
+src = ["src"]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["E501"]  # line length handled by formatter
+
+# ── Pytest ────────────────────────────────────────────────────────────────────
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["src/brainery"]
+omit   = ["*/tests/*", "*/__pycache__/*"]
+
+# ── Mypy ──────────────────────────────────────────────────────────────────────
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true

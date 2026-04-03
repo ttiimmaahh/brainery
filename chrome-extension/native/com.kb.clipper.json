@@ -1,0 +1,9 @@
+{
+  "name": "com.kb.clipper",
+  "description": "KB Clipper native messaging host — saves clipped pages to your knowledge base",
+  "path": "__REPLACE_WITH_ABSOLUTE_PATH__/kb_clipper.py",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://__REPLACE_WITH_EXTENSION_ID__/"
+  ]
+}

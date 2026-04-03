@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KB Clipper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M4 6h16M4 10h16M4 14h10M4 18h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="19" cy="17" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M19 15v2l1 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="title">KB Clipper</span>
+      <div class="status-dot" id="statusDot" title="Native host status"></div>
+    </div>
+
+    <!-- KB Toggle -->
+    <div class="section">
+      <label class="label">Knowledge Base</label>
+      <div class="toggle-group" id="kbToggle">
+        <button class="toggle-btn active" data-value="personal">Personal</button>
+        <button class="toggle-btn" data-value="work">Work</button>
+      </div>
+    </div>
+
+    <!-- Page Title -->
+    <div class="section">
+      <label class="label" for="titleInput">Title</label>
+      <input type="text" id="titleInput" class="input" placeholder="Article title..." />
+    </div>
+
+    <!-- Domain -->
+    <div class="section">
+      <label class="label" for="domainInput">Domain</label>
+      <div class="domain-row">
+        <input type="text" id="domainInput" class="input" placeholder="auto-detect" list="domainSuggestions" />
+        <button class="icon-btn" id="detectDomainBtn" title="Auto-detect domain">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 3C7 3 3 7 3 12s4 9 9 9 9-4 9-9-4-9-9-9z" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <datalist id="domainSuggestions"></datalist>
+      <div class="domain-chips" id="domainChips"></div>
+    </div>
+
+    <!-- Tags -->
+    <div class="section">
+      <label class="label" for="tagsInput">Tags <span class="optional">(optional, comma-separated)</span></label>
+      <input type="text" id="tagsInput" class="input" placeholder="ai, research, tools..." />
+    </div>
+
+    <!-- Clip Mode -->
+    <div class="section">
+      <label class="label">Clip Mode</label>
+      <div class="toggle-group" id="modeToggle">
+        <button class="toggle-btn active" data-value="article">Article</button>
+        <button class="toggle-btn" data-value="selection">Selection</button>
+        <button class="toggle-btn" data-value="full">Full Page</button>
+      </div>
+    </div>
+
+    <!-- Clip Button -->
+    <button class="clip-btn" id="clipBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v14a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2"/>
+        <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      Clip to KB
+    </button>
+
+    <!-- Status Message -->
+    <div class="status-msg" id="statusMsg"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span id="hostStatus">Checking native host...</span>
+      <a href="#" id="settingsLink">Settings</a>
+    </div>
+
+  </div>
+
+  <!-- Settings Panel (hidden by default) -->
+  <div class="settings-panel" id="settingsPanel" style="display:none">
+    <div class="settings-header">
+      <button class="back-btn" id="backBtn">← Back</button>
+      <span>Settings</span>
+    </div>
+    <div class="section">
+      <label class="label">Extension ID</label>
+      <div class="ext-id" id="extensionId">Loading...</div>
+      <p class="hint">Use this ID when running <code>kb install-extension &lt;id&gt;</code></p>
+    </div>
+    <div class="section">
+      <label class="label">Save Mode</label>
+      <select class="input" id="saveModeSelect">
+        <option value="native">Native (direct to KB folder)</option>
+        <option value="download">Download (to Downloads folder)</option>
+      </select>
+    </div>
+    <div class="section" id="downloadPathSection" style="display:none">
+      <label class="label">Personal raw/ path</label>
+      <input type="text" class="input" id="personalPathInput" placeholder="/Users/you/KB/personal/raw" />
+      <label class="label" style="margin-top:8px">Work raw/ path</label>
+      <input type="text" class="input" id="workPathInput" placeholder="/Users/you/KB/work/raw" />
+    </div>
+    <button class="clip-btn" id="saveSettingsBtn">Save Settings</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
