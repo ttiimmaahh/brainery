@@ -24,17 +24,30 @@ def run(args, cfg):
     )
     cfg["personal_kb_path"] = personal_kb_path
 
-    work_kb_path = _prompt(
-        "Work KB path (press Enter to skip)",
-        cfg.get("work_kb_path") or _DEFAULT_WORK,
+    # Ask if they want a work KB
+    has_existing_work = bool(cfg.get("work_kb_path"))
+    default_want_work = "y" if has_existing_work else "n"
+    want_work = _prompt(
+        "Do you also want a separate Work KB? [y/n]",
+        default_want_work,
     )
-    cfg["work_kb_path"] = work_kb_path
 
-    default_kb = _prompt(
-        "Default KB ('personal' or 'work')",
-        cfg.get("default_kb", "personal"),
-    )
-    cfg["default_kb"] = default_kb
+    if want_work.lower().startswith("y"):
+        work_kb_path = _prompt(
+            "Work KB path",
+            cfg.get("work_kb_path") or _DEFAULT_WORK,
+        )
+        cfg["work_kb_path"] = work_kb_path
+
+        default_kb = _prompt(
+            "Default KB ('personal' or 'work')",
+            cfg.get("default_kb", "personal"),
+        )
+        cfg["default_kb"] = default_kb
+    else:
+        cfg["work_kb_path"] = ""
+        cfg["default_kb"] = "personal"
+
     print()
 
     # LLM Backend — auto-detect and present options
@@ -43,9 +56,12 @@ def run(args, cfg):
 
     # Watch settings
     print("=== Watch Settings ===")
+    default_watch = ["personal"]
+    if cfg.get("work_kb_path"):
+        default_watch = ["personal", "work"]
     watch_str = _prompt(
-        "KBs to watch (comma-separated, e.g. 'personal,work')",
-        ",".join(cfg.get("watch_kbs", ["personal"])),
+        "KBs to watch (comma-separated)",
+        ",".join(cfg.get("watch_kbs", default_watch)),
     )
     cfg["watch_kbs"] = [kb.strip() for kb in watch_str.split(",") if kb.strip()]
     print()

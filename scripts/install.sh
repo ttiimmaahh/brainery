@@ -306,9 +306,9 @@ echo ""
 read -r -p "  Start clip server automatically on login? [Y/n] " START_SERVER </dev/tty
 START_SERVER="${START_SERVER:-Y}"
 if [[ "$START_SERVER" =~ ^[Yy]$ ]]; then
-  python3 -c "from brainery.service import install_service; install_service()" 2>/dev/null \
+  brainery serve --install 2>/dev/null \
     && success "Clip server is running" \
-    || warn "Could not start clip server. Run manually: brainery serve"
+    || warn "Could not start clip server. Run manually: brainery serve --install"
 fi
 
 echo ""
