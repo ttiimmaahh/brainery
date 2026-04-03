@@ -153,7 +153,29 @@ def save_clip(message: dict, cfg: dict) -> dict:
 
 
 def run(args, cfg):
-    """Start the clip server."""
+    """Start the clip server, or manage the background service."""
+    from brainery.service import install_service, is_running, uninstall_service
+
+    # Handle --install / --uninstall / --status flags
+    if getattr(args, "install", False):
+        if install_service():
+            print("Clip server will auto-start on login.")
+        return
+
+    if getattr(args, "uninstall", False):
+        uninstall_service()
+        return
+
+    if getattr(args, "status", False):
+        if is_running():
+            print(f"Clip server: running (http://{HOST}:{PORT})")
+        else:
+            print("Clip server: not running")
+            print("  Start it:     brainery serve")
+            print("  Auto-start:   brainery serve --install")
+        return
+
+    # Foreground mode — start the server directly
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(message)s",

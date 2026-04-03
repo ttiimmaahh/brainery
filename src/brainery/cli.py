@@ -137,19 +137,24 @@ Docs & source: https://github.com/timpearsoncx/brainery
     )
 
     # ── serve ─────────────────────────────────────────────────────────────────
-    sub.add_parser(
+    p_serve = sub.add_parser(
         "serve",
         help="Start the clip server (HTTP API for the Chrome extension)",
     )
-
-    # ── install-extension ──────────────────────────────────────────────────────
-    p_ext = sub.add_parser(
-        "install-extension",
-        help="Register the Brainery Chrome extension native messaging host",
+    p_serve.add_argument(
+        "--install",
+        action="store_true",
+        help="Install as a background service (auto-starts on login)",
     )
-    p_ext.add_argument(
-        "extension_id",
-        help="Chrome extension ID (32-char string from chrome://extensions)",
+    p_serve.add_argument(
+        "--uninstall",
+        action="store_true",
+        help="Remove the background service",
+    )
+    p_serve.add_argument(
+        "--status",
+        action="store_true",
+        help="Check if the clip server is running",
     )
 
     # ── dispatch ───────────────────────────────────────────────────────────────
