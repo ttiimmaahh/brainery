@@ -26,14 +26,24 @@ def run(args, cfg):
         return
 
     # Build article context
-    articles_context = "\n---\n".join([f"# {path}\n\n{content[:2000]}" for path, content in articles])
+    article_contents = "\n---\n".join([f"# {path}\n\n{content[:2000]}" for path, content in articles])
+
+    # Load index content
+    index_path = wiki_dir / "_index.md"
+    index_content = ""
+    if index_path.exists():
+        index_content = index_path.read_text(encoding="utf-8")[:500]
 
     # Load query prompt
+    kb_type = cfg.get("kb_type", "personal knowledge base")
     query_prompt_template = load_prompt(cfg, "query")
     prompt = query_prompt_template.format(
+        kb_type=kb_type,
         question=question,
-        articles_context=articles_context,
         domain_scope=domain_scope,
+        output_format=output_format,
+        index_content=index_content,
+        article_contents=article_contents,
     )
 
     # Call LLM
