@@ -37,7 +37,7 @@ You are a knowledge base health checker. Your job is to audit a wiki and produce
 Return a structured markdown report:
 
 ```markdown
-# KB Lint Report — {date}
+# KB Lint Report — <date>
 KB: {kb_type} | Scope: {scope}
 
 ## Summary

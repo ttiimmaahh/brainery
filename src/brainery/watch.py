@@ -34,7 +34,8 @@ def run(args, cfg):
         foreground = getattr(args, "foreground", False)
         kb_list = getattr(args, "kb_list", None)
         if kb_list:
-            cfg["watch_kbs"] = kb_list.split(",")
+            # kb_list is already a list from argparse nargs="+"
+            cfg["watch_kbs"] = kb_list if isinstance(kb_list, list) else kb_list.split(",")
         _start_daemon(cfg, foreground)
 
 
@@ -186,8 +187,8 @@ def _run_watcher_event_driven(cfg: dict, logger: logging.Logger) -> None:
             raw_dir.mkdir(parents=True, exist_ok=True)
             observer.schedule(handler, str(raw_dir), recursive=False)
             logger.info(f"Watching: {raw_dir}")
-        except Exception as e:
-            logger.error(f"Failed to watch {kb_name}: {e}")
+        except (Exception, SystemExit) as e:
+            logger.error(f"Skipping {kb_name} KB (not configured): {e}")
 
     observer.start()
     try:
@@ -216,8 +217,8 @@ def _run_watcher_polling(cfg: dict, logger: logging.Logger) -> None:
                             if raw_file.name not in seen_files or seen_files[raw_file.name] != mtime:
                                 seen_files[raw_file.name] = mtime
                                 _auto_compile_file(raw_file, cfg, logger)
-                except Exception as e:
-                    logger.error(f"Error watching {kb_name}: {e}")
+                except (Exception, SystemExit) as e:
+                    logger.error(f"Skipping {kb_name} KB (not configured): {e}")
 
             time.sleep(10)
         except KeyboardInterrupt:

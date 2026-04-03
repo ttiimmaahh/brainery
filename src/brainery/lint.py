@@ -30,11 +30,20 @@ def run(args, cfg):
 
     summaries_text = "\n".join(summaries)
 
+    # Load index content
+    index_path = wiki_dir / "_index.md"
+    index_content = ""
+    if index_path.exists():
+        index_content = index_path.read_text(encoding="utf-8")[:500]
+
     # Load lint prompt
+    kb_type = cfg.get("kb_type", "personal knowledge base")
     lint_prompt_template = load_prompt(cfg, "lint")
     prompt = lint_prompt_template.format(
-        articles=summaries_text,
-        domain_scope=domain_scope,
+        kb_type=kb_type,
+        scope=domain_scope,
+        index_content=index_content,
+        article_summaries=summaries_text,
     )
 
     # Call LLM
