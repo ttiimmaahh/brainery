@@ -17,13 +17,13 @@ def run(args, cfg):
     print("=== KB Paths ===")
     personal_kb_path = _prompt(
         "Personal KB path",
-        cfg.get("personal_kb_path", _DEFAULT_PERSONAL),
+        cfg.get("personal_kb_path") or _DEFAULT_PERSONAL,
     )
     cfg["personal_kb_path"] = personal_kb_path
 
     work_kb_path = _prompt(
         "Work KB path (press Enter to skip)",
-        cfg.get("work_kb_path", _DEFAULT_WORK),
+        cfg.get("work_kb_path") or _DEFAULT_WORK,
     )
     cfg["work_kb_path"] = work_kb_path
 
@@ -38,7 +38,7 @@ def run(args, cfg):
     print("=== LLM Backend ===")
     llm_backend = _prompt(
         "Backend ('anthropic' or 'local')",
-        cfg.get("llm_backend", "anthropic"),
+        cfg.get("llm_backend") or "anthropic",
     )
     cfg["llm_backend"] = llm_backend
     print()
@@ -53,7 +53,7 @@ def run(args, cfg):
 
         model = _prompt(
             "Model name",
-            cfg.get("default_model", "claude-opus-4-5"),
+            cfg.get("default_model") or "claude-opus-4-5",
         )
         cfg["default_model"] = model
     else:
@@ -71,7 +71,29 @@ def run(args, cfg):
 
     # Save
     save_config(cfg)
+
+    # Create KB directory structures so they're ready to use immediately
+    _scaffold_kb_dirs(cfg)
+
     print("\nSetup complete!")
+
+
+def _scaffold_kb_dirs(cfg: dict) -> None:
+    """Create the raw/, wiki/, and output/ subdirectories for each configured KB."""
+    created_any = False
+    for key in ["personal_kb_path", "work_kb_path"]:
+        path_str = cfg.get(key, "")
+        if not path_str:
+            continue
+        kb_path = Path(path_str).expanduser()
+        for subdir in ["raw", "wiki", "output"]:
+            target = kb_path / subdir
+            if not target.exists():
+                target.mkdir(parents=True, exist_ok=True)
+                created_any = True
+        print(f"  ✓ {kb_path}")
+    if created_any:
+        print()
 
 
 def _setup_local_llm(cfg: dict) -> None:
