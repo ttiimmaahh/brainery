@@ -1,5 +1,7 @@
 # 🧠 Brainery
 
+> **⚠️ In Development** — This project is actively being built. APIs, commands, and configuration may change. Contributions and feedback welcome!
+
 **A brewery for your brain** — an LLM-powered personal & work knowledge base.
 
 Clip articles, drop in documents, and let Brainery compile them into a structured, searchable wiki. Query it like a research assistant. Run it entirely offline with a local model.
@@ -78,18 +80,45 @@ brainery query "Summarize our Q1 strategy" --kb work --format slides
 
 ## LLM backends
 
-Brainery supports two backends, switchable via `brainery setup` or `~/.kbconfig.json`:
+Brainery supports four backends, switchable via `brainery setup` or `~/.kbconfig.json`. The setup wizard auto-detects which backends are available on your system.
 
-### Anthropic (cloud)
-Best quality for `query` and `lint`. Requires an API key from [console.anthropic.com](https://console.anthropic.com).
+| Backend | Type | Dependencies | Best for |
+|---------|------|-------------|----------|
+| **Ollama** | Local server | None (HTTP) | Easy local setup, many model options |
+| **LM Studio** | Local server | None (HTTP) | GUI model management, experimentation |
+| **llama-cpp-python** | In-process | `llama-cpp-python` | Fully offline, no server needed |
+| **Anthropic** | Cloud API | `anthropic` | Best quality, requires API key |
 
-```json
-{ "llm_backend": "anthropic", "default_model": "claude-opus-4-5" }
+### Ollama
+The easiest local option. Install [Ollama](https://ollama.com), pull a model, and go.
+
+```bash
+ollama pull llama3
+brainery setup   # auto-detects Ollama and lists available models
 ```
 
-### Local (llama-cpp-python)
-Offline, free, ideal for `brainery watch` running continuously in the background.
-Any GGUF model works. Recommended: `mistral-7b-instruct`, `llama-3-8b-instruct`, `phi-3-medium`.
+```json
+{ "llm_backend": "ollama", "ollama_model": "llama3" }
+```
+
+### LM Studio
+Use [LM Studio](https://lmstudio.ai) as a backend via its built-in OpenAI-compatible server.
+
+1. Load a model in LM Studio
+2. Start the local server (default port 1234)
+3. Run `brainery setup` — it detects the running server automatically
+
+```json
+{ "llm_backend": "lmstudio", "lmstudio_host": "http://localhost:1234" }
+```
+
+### llama-cpp-python (direct)
+Loads a GGUF model directly in-process. No server required — fully offline and self-contained. Ideal for `brainery watch` running continuously in the background.
+
+```bash
+pip install "brainery[local]"
+brainery setup   # scans for .gguf files automatically
+```
 
 ```json
 {
@@ -100,10 +129,11 @@ Any GGUF model works. Recommended: `mistral-7b-instruct`, `llama-3-8b-instruct`,
 }
 ```
 
-```bash
-pip install "brainery[local]"
-brainery setup   # select 'local' backend — setup will scan for .gguf files automatically
-brainery watch   # daemon starts, model loads once, compiles forever
+### Anthropic (cloud)
+Best quality for `query` and `lint`. Requires an API key from [console.anthropic.com](https://console.anthropic.com).
+
+```json
+{ "llm_backend": "anthropic", "default_model": "claude-opus-4-5" }
 ```
 
 ---
@@ -182,9 +212,13 @@ Config lives at `~/.kbconfig.json`. Edit directly or via `brainery setup`.
   "personal_kb_path": "~/.brainery/personal",
   "work_kb_path":     "~/.brainery/work",
   "default_kb":       "personal",
-  "llm_backend":      "anthropic",
-  "anthropic_api_key": "sk-ant-...",
+  "llm_backend":      "ollama",
+  "anthropic_api_key": "",
   "default_model":    "claude-opus-4-5",
+  "ollama_host":      "http://localhost:11434",
+  "ollama_model":     "llama3",
+  "lmstudio_host":    "http://localhost:1234",
+  "lmstudio_model":   "",
   "local_model_path": "",
   "local_model_context": 4096,
   "local_model_gpu_layers": 0,
