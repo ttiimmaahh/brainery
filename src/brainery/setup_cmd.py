@@ -113,8 +113,12 @@ def _setup_local_llm(cfg: dict) -> None:
 def _prompt(question: str, default: str = "") -> str:
     """Prompt user for input with optional default."""
     prompt_str = f"{question} [{default}]: " if default else f"{question}: "
-
-    response = input(prompt_str).strip()
+    try:
+        response = input(prompt_str).strip()
+    except EOFError:
+        # stdin not interactive (e.g. piped); accept the default silently
+        print()
+        return default
     return response if response else default
 
 
@@ -123,6 +127,9 @@ def _prompt_secret(question: str, default: str = "") -> str:
     import getpass
 
     prompt_str = f"{question} [***]: " if default else f"{question}: "
-
-    response = getpass.getpass(prompt_str).strip()
+    try:
+        response = getpass.getpass(prompt_str).strip()
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return default
     return response if response else default

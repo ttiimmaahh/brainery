@@ -193,7 +193,7 @@ else
     echo ""
     echo -e "    ${YELLOW}export PATH=\"${SCRIPTS_DIR}:\$PATH\"${NC}"
     echo ""
-    read -r -p "  Add it automatically now? [Y/n] " ADD_PATH
+    read -r -p "  Add it automatically now? [Y/n] " ADD_PATH </dev/tty
     ADD_PATH="${ADD_PATH:-Y}"
     if [[ "$ADD_PATH" =~ ^[Yy]$ ]]; then
       echo "" >> "$SHELL_RC"
@@ -215,11 +215,11 @@ echo ""
 if [[ -z "${BRAINERY_NO_SETUP:-}" ]]; then
   echo -e "  Run ${BOLD}kb setup${NC} to configure your knowledge base paths and LLM backend."
   echo ""
-  read -r -p "  Run 'kb setup' now? [Y/n] " RUN_SETUP
+  read -r -p "  Run 'kb setup' now? [Y/n] " RUN_SETUP </dev/tty
   RUN_SETUP="${RUN_SETUP:-Y}"
   if [[ "$RUN_SETUP" =~ ^[Yy]$ ]]; then
     echo ""
-    kb setup
+    kb setup </dev/tty
   fi
 fi
 
