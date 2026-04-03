@@ -41,6 +41,27 @@ if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
   exit 0
 fi
 
+# ── Stop clip server service ──────────────────────────────────────────────────
+header "Stopping Clip Server"
+
+# macOS launchd
+PLIST="$HOME/Library/LaunchAgents/com.brainery.serve.plist"
+if [[ -f "$PLIST" ]]; then
+  launchctl unload "$PLIST" 2>/dev/null
+  rm -f "$PLIST"
+  success "Removed launchd service"
+fi
+
+# Linux systemd
+UNIT="$HOME/.config/systemd/user/brainery-serve.service"
+if [[ -f "$UNIT" ]]; then
+  systemctl --user stop brainery-serve 2>/dev/null
+  systemctl --user disable brainery-serve 2>/dev/null
+  rm -f "$UNIT"
+  systemctl --user daemon-reload 2>/dev/null
+  success "Removed systemd service"
+fi
+
 # ── Remove CLI ────────────────────────────────────────────────────────────────
 header "Removing Brainery CLI"
 

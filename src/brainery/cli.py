@@ -31,11 +31,14 @@ Examples:
   kb lint                                          Run wiki health checks
   kb watch                                         Start background auto-compile daemon
   kb watch --stop
+  kb serve                                         Start clip server for Chrome extension
   kb install-extension <chrome-extension-id>
 
 LLM backends:
   anthropic   Claude API (cloud) — best quality, requires API key
-  local       llama-cpp-python (GGUF) — offline, free, ideal for kb watch daemon
+  ollama      Ollama (local server) — easy setup, many models
+  lmstudio    LM Studio (local server) — GUI model management
+  local       llama-cpp-python (GGUF) — offline, no server needed
 
 Docs & source: https://github.com/timpearsoncx/brainery
         """,
@@ -133,6 +136,12 @@ Docs & source: https://github.com/timpearsoncx/brainery
         help="Which KBs to watch (default: all configured)",
     )
 
+    # ── serve ─────────────────────────────────────────────────────────────────
+    sub.add_parser(
+        "serve",
+        help="Start the clip server (HTTP API for the Chrome extension)",
+    )
+
     # ── install-extension ──────────────────────────────────────────────────────
     p_ext = sub.add_parser(
         "install-extension",
@@ -184,6 +193,8 @@ def _dispatch(args, cfg: dict) -> None:
         from brainery.lint import run
     elif command == "watch":
         from brainery.watch import run
+    elif command == "serve":
+        from brainery.server import run
     elif command == "install-extension":
         from brainery.extension import run
     else:

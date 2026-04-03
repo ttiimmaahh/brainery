@@ -298,6 +298,19 @@ if [[ -z "${BRAINERY_NO_SETUP:-}" ]]; then
   fi
 fi
 
+# ── Start clip server ────────────────────────────────────────────────────────
+header "Clip Server"
+echo -e "  The clip server lets the Chrome extension send clips to Brainery."
+echo -e "  It runs in the background on ${BOLD}http://127.0.0.1:52337${NC}"
+echo ""
+read -r -p "  Start clip server automatically on login? [Y/n] " START_SERVER </dev/tty
+START_SERVER="${START_SERVER:-Y}"
+if [[ "$START_SERVER" =~ ^[Yy]$ ]]; then
+  python3 -c "from brainery.service import install_service; install_service()" 2>/dev/null \
+    && success "Clip server is running" \
+    || warn "Could not start clip server. Run manually: brainery serve"
+fi
+
 echo ""
 echo -e "  ${DIM}Docs: https://github.com/ttiimmaahh/brainery${NC}"
 echo -e "  ${DIM}Give it a star if it helps you! ⭐${NC}"

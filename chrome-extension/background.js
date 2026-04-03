@@ -1,7 +1,7 @@
 // KB Clipper — background.js (Service Worker)
-// Handles native messaging to the kb_clipper host
+// Communicates with the Brainery clip server via HTTP (localhost:52337)
 
-const NATIVE_HOST = "com.kb.clipper";
+const SERVER_URL = "http://127.0.0.1:52337";
 
 // ─── Message Router ───────────────────────────────────────────────────────────
 
@@ -21,12 +21,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 async function handlePing(sendResponse) {
   try {
-    const response = await sendNativeMessage({ action: "ping" });
+    const resp = await fetch(`${SERVER_URL}/api/ping`);
+    const data = await resp.json();
     sendResponse({
       pong: true,
-      personalPath: response.personalPath,
-      workPath: response.workPath,
-      version: response.version,
+      personalPath: data.personalPath,
+      workPath: data.workPath,
+      version: data.version,
     });
   } catch (err) {
     sendResponse({ pong: false, error: err.message });
@@ -37,40 +38,27 @@ async function handlePing(sendResponse) {
 
 async function handleSave(payload, sendResponse) {
   try {
-    const response = await sendNativeMessage({
-      action: "save",
-      filename: payload.filename,
-      content: payload.content,
-      kb: payload.kb,
-      domain: payload.domain,
+    const resp = await fetch(`${SERVER_URL}/api/clip`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        filename: payload.filename,
+        content: payload.content,
+        kb: payload.kb,
+        domain: payload.domain,
+      }),
     });
 
-    if (response.success) {
-      sendResponse({ success: true, path: response.path });
+    const data = await resp.json();
+
+    if (data.success) {
+      sendResponse({ success: true, path: data.path });
     } else {
-      sendResponse({ success: false, error: response.error || "Unknown error from native host" });
+      sendResponse({ success: false, error: data.error || "Unknown error from server" });
     }
   } catch (err) {
     sendResponse({ success: false, error: err.message });
   }
-}
-
-// ─── Native Messaging ─────────────────────────────────────────────────────────
-
-function sendNativeMessage(message) {
-  return new Promise((resolve, reject) => {
-    try {
-      chrome.runtime.sendNativeMessage(NATIVE_HOST, message, (response) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-        resolve(response || {});
-      });
-    } catch (err) {
-      reject(err);
-    }
-  });
 }
 
 // ─── Keyboard Shortcut ────────────────────────────────────────────────────────
@@ -108,18 +96,15 @@ chrome.commands?.onCommand?.addListener(async (command) => {
         conflictAction: "uniquify",
       });
     } else {
-      await new Promise((resolve, reject) => {
-        chrome.runtime.sendNativeMessage(NATIVE_HOST, {
-          action: "save",
-          filename,
-          content,
-          kb,
-          domain,
-        }, (resp) => {
-          if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
-          else resolve(resp);
+      try {
+        await fetch(`${SERVER_URL}/api/clip`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ filename, content, kb, domain }),
         });
-      });
+      } catch (err) {
+        console.error("KB Clipper: clip server not reachable", err);
+      }
     }
 
     // Brief notification

@@ -22,8 +22,8 @@ const WORK_DOMAINS = [
 let state = {
   kb: "personal",
   mode: "article",
-  saveMode: "native",   // "native" | "download"
-  nativeConnected: false,
+  saveMode: "server",   // "server" | "download"
+  connected: false,
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -49,11 +49,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateDomainSuggestions(state.kb);
   populateRecentDomains(saved.recentDomains || []);
 
-  // Check native host
-  await checkNativeHost();
+  // Check clip server
+  await checkServer();
 
   // Settings panel
-  document.getElementById("extensionId").textContent = chrome.runtime.id;
   document.getElementById("saveModeSelect").value = state.saveMode;
   if (saved.personalPath) document.getElementById("personalPathInput").value = saved.personalPath;
   if (saved.workPath)     document.getElementById("workPathInput").value = saved.workPath;
@@ -158,8 +157,8 @@ async function handleClip() {
 
     setStatus(`Saving ${wordCount} words...`, "info");
 
-    if (state.saveMode === "native") {
-      await saveViaNative({ filename, content, kb: state.kb, domain });
+    if (state.saveMode === "server") {
+      await saveViaServer({ filename, content, kb: state.kb, domain });
     } else {
       await saveViaDownload({ filename, content, kb: state.kb });
     }
@@ -373,14 +372,14 @@ function buildMarkdownDocument({ title, markdown, domain, tags, url, now }) {
 
 // ─── Save Methods ─────────────────────────────────────────────────────────────
 
-async function saveViaNative({ filename, content, kb, domain }) {
+async function saveViaServer({ filename, content, kb, domain }) {
   const response = await chrome.runtime.sendMessage({
     action: "saveToKB",
     payload: { filename, content, kb, domain },
   });
 
   if (!response?.success) {
-    throw new Error(response?.error || "Native host failed");
+    throw new Error(response?.error || "Clip server failed");
   }
 }
 
@@ -396,18 +395,18 @@ async function saveViaDownload({ filename, content, kb }) {
   });
 }
 
-// ─── Native Host Check ────────────────────────────────────────────────────────
+// ─── Server Check ─────────────────────────────────────────────────────────────
 
-async function checkNativeHost() {
+async function checkServer() {
   const dot = document.getElementById("statusDot");
   const hostStatus = document.getElementById("hostStatus");
 
   try {
     const response = await chrome.runtime.sendMessage({ action: "ping" });
     if (response?.pong) {
-      state.nativeConnected = true;
+      state.connected = true;
       dot.className = "status-dot connected";
-      hostStatus.textContent = `Native host connected`;
+      hostStatus.textContent = "Clip server connected";
       if (response.personalPath || response.workPath) {
         hostStatus.textContent = `Connected · ${response.personalPath?.split("/").slice(-3, -1).join("/")}`;
       }
@@ -415,14 +414,14 @@ async function checkNativeHost() {
       throw new Error("no pong");
     }
   } catch {
-    state.nativeConnected = false;
+    state.connected = false;
     const saved = await chrome.storage.local.get("saveMode");
     if (saved.saveMode === "download") {
       dot.className = "status-dot download-mode";
-      hostStatus.textContent = "Download mode (native not connected)";
+      hostStatus.textContent = "Download mode (server not running)";
     } else {
       dot.className = "status-dot disconnected";
-      hostStatus.textContent = "Native host not found — see Settings";
+      hostStatus.textContent = "Clip server not running — run: brainery serve";
     }
   }
 }
@@ -555,6 +554,6 @@ async function saveSettings() {
   setTimeout(() => {
     setStatus("", "");
     showSettings(false);
-    checkNativeHost();
+    checkServer();
   }, 1000);
 }

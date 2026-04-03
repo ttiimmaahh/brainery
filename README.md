@@ -66,7 +66,7 @@ brainery query "Summarize our Q1 strategy" --kb work --format slides
 | `brainery search "<term>"` | Instant full-text search (no LLM) |
 | `brainery lint` | LLM health check: gaps, broken links, opportunities |
 | `brainery watch` | Background daemon: auto-compile new files as they arrive |
-| `brainery install-extension <id>` | Register the KB Clipper Chrome extension |
+| `brainery serve` | Start the clip server (HTTP API for the Chrome extension) |
 
 ### Global flags
 
@@ -145,11 +145,10 @@ Clip web pages directly into your KB with domain tagging — no copy-paste, no f
 **Install:**
 1. Clone this repo or [download the extension](chrome-extension/)
 2. Open `chrome://extensions` → enable Developer mode → Load unpacked → select `chrome-extension/`
-3. Copy the extension ID shown
-4. Run `brainery install-extension <id>`
-5. Click the extension icon — the dot turns green ✓
+3. Make sure the clip server is running (installed automatically, or run `brainery serve`)
+4. Click the extension icon — the dot turns green ✓
 
-The extension writes clipped pages as markdown directly to your `raw/` directory via a native messaging host. Select personal or work KB, pick a domain, and click **Clip to KB**.
+The extension communicates with the Brainery clip server (`localhost:52337`) via HTTP. No native messaging setup, no extension IDs to copy. Select personal or work KB, pick a domain, and click **Clip to KB**.
 
 ---
 
