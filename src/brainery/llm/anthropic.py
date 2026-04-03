@@ -11,11 +11,18 @@ def call(cfg: dict, prompt: str, max_tokens: int) -> str:
     try:
         import anthropic
     except ImportError:
+        import shutil
         print("  [info] Installing anthropic SDK...")
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "anthropic", "--break-system-packages", "-q"],
-            check=True,
-        )
+        if shutil.which("uv"):
+            subprocess.run(
+                ["uv", "pip", "install", "--python", sys.executable, "anthropic"],
+                check=True,
+            )
+        else:
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "anthropic", "-q"],
+                check=True,
+            )
         import anthropic
 
     api_key = cfg.get("anthropic_api_key") or os.environ.get("ANTHROPIC_API_KEY", "")

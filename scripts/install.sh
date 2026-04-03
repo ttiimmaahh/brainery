@@ -161,6 +161,66 @@ fi
 
 success "Brainery installed"
 
+# ── Detect local LLM backends ────────────────────────────────────────────────
+header "LLM Backend Detection"
+
+LLM_FOUND=0
+
+# Ollama
+if command -v ollama &>/dev/null; then
+  OLLAMA_MODELS=$(ollama list 2>/dev/null | tail -n +2 | awk '{print $1}' | head -5 | tr '\n' ', ' | sed 's/,$//')
+  if [[ -n "$OLLAMA_MODELS" ]]; then
+    success "Ollama — models: $OLLAMA_MODELS"
+  else
+    success "Ollama — installed (no models pulled yet)"
+    info "  Pull a model: ollama pull llama3"
+  fi
+  LLM_FOUND=$((LLM_FOUND + 1))
+else
+  info "Ollama — not found (https://ollama.com)"
+fi
+
+# LM Studio (check if server is running)
+if curl -sf http://localhost:1234/v1/models >/dev/null 2>&1; then
+  success "LM Studio — server running on :1234"
+  LLM_FOUND=$((LLM_FOUND + 1))
+else
+  info "LM Studio — server not detected on :1234"
+fi
+
+# GGUF models (quick scan)
+GGUF_COUNT=0
+for search_dir in \
+  "$HOME/.lmstudio/models" \
+  "$HOME/Library/Application Support/LM Studio/Models" \
+  "$HOME/jan/models" \
+  "$HOME/models" \
+  "$HOME/.local/share/models"; do
+  if [[ -d "$search_dir" ]]; then
+    count=$(find "$search_dir" -name '*.gguf' -maxdepth 4 2>/dev/null | head -10 | wc -l | tr -d ' ')
+    GGUF_COUNT=$((GGUF_COUNT + count))
+  fi
+done
+
+if [[ "$GGUF_COUNT" -gt 0 ]]; then
+  success "llama-cpp — $GGUF_COUNT .gguf model(s) found locally"
+  LLM_FOUND=$((LLM_FOUND + 1))
+else
+  info "llama-cpp — no .gguf models found"
+fi
+
+# Anthropic
+info "Anthropic API — always available (requires API key)"
+
+if [[ "$LLM_FOUND" -eq 0 ]]; then
+  echo ""
+  warn "No local LLM backends detected."
+  info "  For local/offline use, install one of:"
+  info "    Ollama:     https://ollama.com"
+  info "    LM Studio:  https://lmstudio.ai"
+  info "  Or use the Anthropic API (cloud, requires API key)."
+fi
+
 # ── PATH check ────────────────────────────────────────────────────────────────
 header "PATH configuration"
 

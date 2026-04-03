@@ -13,10 +13,18 @@ def call(cfg: dict, prompt: str, max_tokens: int) -> str:
         from llama_cpp import Llama
     except ImportError:
         print("  [info] Installing llama-cpp-python...")
-        subprocess.run(
-            [sys.executable, "-m", "pip", "install", "llama-cpp-python", "--break-system-packages", "-q"],
-            check=True,
-        )
+        # Prefer uv (used by uv tool environments), fall back to pip
+        import shutil
+        if shutil.which("uv"):
+            subprocess.run(
+                ["uv", "pip", "install", "--python", sys.executable, "llama-cpp-python"],
+                check=True,
+            )
+        else:
+            subprocess.run(
+                [sys.executable, "-m", "pip", "install", "llama-cpp-python", "-q"],
+                check=True,
+            )
         from llama_cpp import Llama
 
     model_path = cfg.get("local_model_path", "")

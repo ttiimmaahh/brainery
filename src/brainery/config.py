@@ -15,6 +15,13 @@ DEFAULT_CONFIG: dict = {
     "default_kb": "personal",
     "default_model": "claude-opus-4-5",
     "llm_backend": "anthropic",
+    # Ollama backend
+    "ollama_host": "http://localhost:11434",
+    "ollama_model": "",
+    # LM Studio backend (OpenAI-compatible)
+    "lmstudio_host": "http://localhost:1234",
+    "lmstudio_model": "",
+    # llama-cpp-python direct backend
     "local_model_path": "",
     "local_model_context": 4096,
     "local_model_threads": 0,       # 0 = auto-detect cpu count
