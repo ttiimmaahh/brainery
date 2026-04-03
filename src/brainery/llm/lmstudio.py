@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 import json
-import sys
-import urllib.request
 import urllib.error
+import urllib.request
 
 
 def call(cfg: dict, prompt: str, max_tokens: int) -> str:
