@@ -4,8 +4,8 @@ from pathlib import Path
 
 from brainery.config import save_config
 
-_DEFAULT_PERSONAL = str(Path.home() / ".brainery" / "personal")
-_DEFAULT_WORK = str(Path.home() / ".brainery" / "work")
+_DEFAULT_PERSONAL = "~/.brainery/personal"
+_DEFAULT_WORK = "~/.brainery/work"
 
 
 def run(args, cfg):
