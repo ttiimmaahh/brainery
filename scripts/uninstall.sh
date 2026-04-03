@@ -181,10 +181,30 @@ if [[ ${#KB_DIRS[@]} -gt 0 ]]; then
   fi
 fi
 
-# Clean up empty .brainery dir if nothing left
-if [[ -d "$BRAINERY_DIR" ]] && [[ -z "$(ls -A "$BRAINERY_DIR" 2>/dev/null)" ]]; then
-  rmdir "$BRAINERY_DIR"
-  success "Removed empty $BRAINERY_DIR"
+# Clean up .brainery dir
+if [[ -d "$BRAINERY_DIR" ]]; then
+  # Remove logs and other generated files
+  for f in "$BRAINERY_DIR/serve.log" "$HOME/.kb_clipper.log"; do
+    [[ -f "$f" ]] && rm -f "$f" && info "Removed $f"
+  done
+
+  if [[ -z "$(ls -A "$BRAINERY_DIR" 2>/dev/null)" ]]; then
+    rmdir "$BRAINERY_DIR"
+    success "Removed empty $BRAINERY_DIR"
+  else
+    echo ""
+    info "Remaining contents in $BRAINERY_DIR:"
+    ls "$BRAINERY_DIR" | sed 's/^/    /'
+    echo ""
+    read -r -p "  Remove entire $BRAINERY_DIR directory? [y/N] " RM_DIR </dev/tty
+    RM_DIR="${RM_DIR:-N}"
+    if [[ "$RM_DIR" =~ ^[Yy]$ ]]; then
+      rm -rf "$BRAINERY_DIR"
+      success "Removed $BRAINERY_DIR"
+    else
+      info "Kept $BRAINERY_DIR"
+    fi
+  fi
 fi
 
 # ── Done ──────────────────────────────────────────────────────────────────────
