@@ -10,11 +10,10 @@ clipped files directly to the appropriate raw/ directory.
 """
 
 import json
-import os
+import logging
 import re
 import struct
 import sys
-import logging
 from datetime import datetime
 from pathlib import Path
 
