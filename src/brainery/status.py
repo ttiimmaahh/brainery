@@ -4,6 +4,7 @@ from collections import defaultdict
 
 from brainery.compile import get_compiled_sources
 from brainery.config import get_kb_path
+from brainery.service import is_running
 
 
 def run(args, cfg):
@@ -47,6 +48,14 @@ def run(args, cfg):
 
     # Print status
     print(f"KB: {kb} ({kb_path})")
+    print(f"Backend:    {cfg.get('llm_backend', 'anthropic')}")
+
+    # Clip server status
+    if is_running():
+        print("Clip server: running (http://127.0.0.1:52337)")
+    else:
+        print("Clip server: not running")
+
     print()
     print(f"Raw files:  {raw_count}")
     if uncompiled_count > 0:
