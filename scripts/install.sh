@@ -161,6 +161,20 @@ fi
 
 success "Brainery installed"
 
+# ── Create 'kb' shorthand alias ──────────────────────────────────────────────
+# The package only ships the 'brainery' binary; 'kb' is a convenience symlink.
+if command -v brainery &>/dev/null; then
+  BRAINERY_BIN="$(command -v brainery)"
+  KB_LINK="$(dirname "$BRAINERY_BIN")/kb"
+  if [[ ! -e "$KB_LINK" ]]; then
+    ln -sf "$BRAINERY_BIN" "$KB_LINK" 2>/dev/null \
+      && success "'kb' alias created → $KB_LINK" \
+      || warn "Could not create 'kb' symlink (try: sudo ln -sf $BRAINERY_BIN $KB_LINK)"
+  else
+    success "'kb' alias already exists at $KB_LINK"
+  fi
+fi
+
 # ── Detect local LLM backends ────────────────────────────────────────────────
 header "LLM Backend Detection"
 
@@ -234,11 +248,11 @@ else
 fi
 
 PATH_OK=false
-if command -v kb &>/dev/null; then
+if command -v brainery &>/dev/null; then
   PATH_OK=true
-  success "'kb' command found at $(command -v kb)"
+  success "'brainery' command found at $(command -v brainery)"
 else
-  warn "'kb' not found on PATH."
+  warn "'brainery' not found on PATH."
   info "Scripts directory: ${SCRIPTS_DIR}"
   echo ""
   SHELL_RC=""
@@ -273,13 +287,14 @@ echo -e "  ${GREEN}${BOLD}Brainery is installed.${NC}"
 echo ""
 
 if [[ -z "${BRAINERY_NO_SETUP:-}" ]]; then
-  echo -e "  Run ${BOLD}kb setup${NC} to configure your knowledge base paths and LLM backend."
+  echo -e "  Run ${BOLD}brainery setup${NC} to configure your knowledge base paths and LLM backend."
+  echo -e "  ${DIM}(Tip: 'kb' is a shorthand alias for 'brainery')${NC}"
   echo ""
-  read -r -p "  Run 'kb setup' now? [Y/n] " RUN_SETUP </dev/tty
+  read -r -p "  Run 'brainery setup' now? [Y/n] " RUN_SETUP </dev/tty
   RUN_SETUP="${RUN_SETUP:-Y}"
   if [[ "$RUN_SETUP" =~ ^[Yy]$ ]]; then
     echo ""
-    kb setup </dev/tty
+    brainery setup </dev/tty
   fi
 fi
 

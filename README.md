@@ -49,8 +49,8 @@ brainery query "What are the main ideas from my recent AI reading?"
 brainery query "Summarize our Q1 strategy" --kb work --format slides
 ```
 
-> **Tip:** `kb` is a short alias for `brainery` — both commands are installed.
-> Power users can type `kb compile`, `kb query`, etc. for speed.
+> **Tip:** `kb` is a shorthand alias for `brainery` — created automatically by the installer.
+> Use whichever you prefer: `kb compile`, `kb query`, etc.
 
 ---
 

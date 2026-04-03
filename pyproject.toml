@@ -60,7 +60,6 @@ dev = [
 ]
 
 [project.scripts]
-kb       = "brainery.cli:main"
 brainery = "brainery.cli:main"
 
 [project.urls]

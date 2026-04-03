@@ -75,6 +75,16 @@ if ! $REMOVED; then
   warn "brainery not found via uv or pip — may already be uninstalled."
 fi
 
+# Remove 'kb' symlink if it points to brainery
+if [[ -L "$(command -v kb 2>/dev/null)" ]]; then
+  KB_TARGET=$(readlink "$(command -v kb)")
+  if [[ "$KB_TARGET" == *brainery* ]]; then
+    rm -f "$(command -v kb)" 2>/dev/null \
+      && success "Removed 'kb' symlink" \
+      || warn "Could not remove 'kb' symlink — remove manually: rm $(command -v kb)"
+  fi
+fi
+
 # ── Config files ──────────────────────────────────────────────────────────────
 header "Config files"
 
