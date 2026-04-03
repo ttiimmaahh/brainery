@@ -40,7 +40,7 @@ jobs:
         run: pytest tests/ --cov=brainery --cov-report=term-missing
 
       - name: Verify CLI entry point works
-        run: kb --version
+        run: brainery --version
 
       - name: Verify package imports cleanly
         run: python -c "import brainery; print(f'brainery {brainery.__version__} OK')"

@@ -22,7 +22,7 @@ jobs:
           cache: pip
       - run: pip install -e ".[dev]"
       - run: pytest tests/
-      - run: kb --version
+      - run: brainery --version
 
   # ── Build distribution ──────────────────────────────────────────────────────
   build:
